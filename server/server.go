@@ -43,22 +43,6 @@ func server(port string) error {
 	return s.ListenAndServe()
 }
 
-/* func Echo(ws *websocket.Conn) {
-	var err error
-
-	for {
-		var reply string
-
-		if err = websocket.Message.Receive(ws, &reply); err != nil {
-			fmt.Println("Can't receive")
-			break
-		}
-
-		fmt.Println("Mensaje del cliente: " + reply)
-
-	}
-
-} */
 func handler(ws *websocket.Conn, h *hub) {
 	go h.run()
 	h.addClientChan <- ws
