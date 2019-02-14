@@ -9,10 +9,12 @@ import (
 	"golang.org/x/net/websocket"
 )
 
+//Struct que contendra el ms
 type Message struct {
 	Text string `json:"text"`
 }
 
+//Strcut que con las funciones que se ocupan en el servidor
 type hub struct {
 	clients          map[string]*websocket.Conn
 	addClientChan    chan *websocket.Conn
@@ -20,19 +22,19 @@ type hub struct {
 	broadcastChan    chan Message
 }
 
+//Variable estatica para el puerto que se conectara el servidor
 var (
 	port = flag.String("port", "8000", "puerto usado por ws connection")
 )
 
 func main() {
 	flag.Parse()
+	//Verifica si la conexion es correcta
 	log.Fatal(server(*port))
-
-	///
 
 }
 
-// server crear a websocket
+// Funcion que permite crear el servidor y ejecutar el websocket
 func server(port string) error {
 	h := newHub()
 	mux := http.NewServeMux()
@@ -43,6 +45,7 @@ func server(port string) error {
 	return s.ListenAndServe()
 }
 
+//Función handler encargada de ejecutar la go rutina h y verifica los mensajes para los clientes
 func handler(ws *websocket.Conn, h *hub) {
 	go h.run()
 	h.addClientChan <- ws
@@ -59,6 +62,7 @@ func handler(ws *websocket.Conn, h *hub) {
 	}
 }
 
+//NewHub retorna las funciones que ocupa el servidor para interactuar
 func newHub() *hub {
 	return &hub{
 		clients:          make(map[string]*websocket.Conn),
@@ -68,6 +72,7 @@ func newHub() *hub {
 	}
 }
 
+//run selecciona que debe de hacer de acuerdo a lo recibido de la funcion
 func (h *hub) run() {
 	for {
 		select {
@@ -81,14 +86,17 @@ func (h *hub) run() {
 	}
 }
 
+//Quita los clientes del servidor
 func (h *hub) removeClient(conn *websocket.Conn) {
 	delete(h.clients, conn.LocalAddr().String())
 }
 
+//Agrega un nuevo cliente al servidor
 func (h *hub) addClient(conn *websocket.Conn) {
 	h.clients[conn.RemoteAddr().String()] = conn
 }
 
+//Verifica a los clientes conectados y si un clente se desconecta manda ms que el cliente no puede recibir ms
 func (h *hub) broadcastMessage(m Message) {
 	for _, conn := range h.clients {
 		err := websocket.JSON.Send(conn, m)
