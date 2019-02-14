@@ -41,6 +41,7 @@ func server(port string) error {
 	mux.Handle("/", websocket.Handler(func(ws *websocket.Conn) {
 		handler(ws, h)
 	}))
+	//Direccion IP del servidor
 	s := http.Server{Addr: "192.168.13.3" + ":" + port, Handler: mux}
 	return s.ListenAndServe()
 }
@@ -62,7 +63,7 @@ func handler(ws *websocket.Conn, h *hub) {
 	}
 }
 
-//NewHub retorna las funciones que ocupa el servidor para interactuar
+//NewHub  inicializa y retorna las funciones que ocupa el servidor para interactuar
 func newHub() *hub {
 	return &hub{
 		clients:          make(map[string]*websocket.Conn),
